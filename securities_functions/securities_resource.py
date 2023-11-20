@@ -15,34 +15,27 @@ class SecuritiesResource():
 
     def get_top10_securities_by_price(self) -> List[SecuritiesModel]:
         logger.info("In resource")
-        result = self.data_service.get_top10_securities_by_price_pandas()
-        logger.info(type(result))
+        result = self.data_service.get_top10_securities_by_price_sql()
+        #logger.info(type(result))
         logger.info("Finished in resource")
         #get_portfolio(member_id, is_benchmark)
-        return result
-
+        return result 
+    
     def get_security_by_ticker(self, ticker: str = None) -> List[SecuritiesModel]:
         logger.info("In resource")
-        result = self.data_service.get_security_by_ticker_pandas(ticker)
+        self.data_service.update_security_by_ticker_sql(ticker)
+        #result = self.data_service.get_security_by_ticker_pandas(ticker
+        result = self.data_service.get_security_by_ticker_sql(ticker)
         logger.info(type(result))
         logger.info("Finished in resource")
         #get_portfolio(member_id, is_benchmark)
         return result
     
-    def get_security_by_ticker(self, ticker: str = None) -> List[SecuritiesModel]:
-        logger.info("In resource")
-        result = self.data_service.get_security_by_ticker_pandas(ticker)
-        logger.info(type(result))
-        logger.info("Finished in resource")
-        #get_portfolio(member_id, is_benchmark)
-        return result
-    
-    def update_security_price(self, ticker_id: str = None)  -> List[SecuritiesModel]:
-        pass
     
     def get_info_watchlist_by_ticker(self, ticker: str = None) -> List[InfoWatchlistModel]:
         logger.info("In resource")
-        result = self.data_service.get_infowatchlist_by_ticker_pandas(ticker)
+        self.data_service.update_security_by_ticker_sql(ticker)
+        result = self.data_service.get_infowatchlist_by_ticker_sql(ticker)
         logger.info(result)
         logger.info("Finished in resource")
         #get_portfolio(member_id, is_benchmark)
