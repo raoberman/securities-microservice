@@ -9,12 +9,11 @@ logger = logging.getLogger(__name__)
 
 class SecuritiesModel(BaseModel):
     ticker: str
-    stock_name: str
     current_price: float
 
 class InfoWatchlistModel(BaseModel):
     ticker: str
-    stock_name: str
+    stock_name: str | None = None
     current_price: float
     stock_industry: str | None = None
     stock_info: float | None = None

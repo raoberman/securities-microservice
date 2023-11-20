@@ -18,12 +18,15 @@ app = FastAPI()
 
 def get_data_service():
 
-    config = {
-        "data_directory": "./test_data",
-        "data_file": "sample_stock_data.json"
-    }
+    # config = {
+    #     "host":"database-1.csxyhdnwgd0j.us-east-2.rds.amazonaws.com",
+    #     "port":"3306",
+    #     "user":"admin",
+    #     "passw":"TeamAWSome2024$",
+    #     "database":"stocks"
+    # }
 
-    ds = securitiesDataService(config)
+    ds = securitiesDataService()
 
     return ds
 
@@ -69,23 +72,14 @@ async def get_security_resource_info_watchlist(ticker: str):
 
 @app.get("/securities/{ticker}/buy_security/{member_id}/{portfolio_id}")
 async def buy_security_by_id(ticker: str):
+    #TODO perform redirect to portfolio sell command
     pass
 
 
 @app.get("/securities/{ticker}/sell_security/{member_id}/{portfolio_id}")
 async def sell_security_by_id(ticker: str):
+    #TODO perform redirect to portfolio sell command
     pass
-
-# @app.get("/hello/{name}")
-# async def say_hello(name: str):
-#     return {"message": f"AWSome Merry Men cloud developer rao2140 says hello {name}"}
-
-
-# @app.get("/hello_text/{name}")
-# async def say_hello_text(name: str):
-#     the_message = f"AWSome Merry Men cloud developer rao2140 says Hello {name}"
-#     rsp = Response(content=the_message, media_type="text/plain")
-#     return rsp
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8015, log_level="info")
