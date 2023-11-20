@@ -1,4 +1,4 @@
-FROM python:3.12.0-slim-bookworm
+FROM public.ecr.aws/docker/library/python:3.12
 
 RUN apk add --no-cache --update \
     python3 python3-dev gcc \
