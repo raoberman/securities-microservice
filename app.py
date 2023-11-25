@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Response, Query
+
 import logging
 
 # I like to launch directly and not use the standard FastAPI startup
@@ -47,21 +48,21 @@ def get_securities_resource():
 securities_resource = get_securities_resource()
 
 
-@app.get("/top_securities_by_price")
-async def get_security_top_10(limit: int = 10, offset: int = 0):
+@app.get("/top_securities_by_price", response_model = List[SecuritiesModel])
+async def get_top_securities_by_price(limit: int = 10, offset: int = 0):
     logger.info("In App.py")
-    result = securities_resource.get_top10_securities_by_price(limit, offset)
+    result = securities_resource.get_top_securities_by_price(limit, offset)
     logger.info("Pass result App.py")
     return result
 
-@app.get("/securities/{ticker}")
+@app.get("/securities/{ticker}", response_model = SecuritiesModel)
 async def get_security_resource_by_ticker(ticker: str):
     logger.info("In App.py")
     result = securities_resource.get_security_by_ticker(ticker = ticker)
     logger.info("Pass result App.py")
     return result
 
-@app.get("/securities/{ticker}/info_watchlist")
+@app.get("/securities/{ticker}/info_watchlist", response_model = InfoWatchlistModel)
 async def get_security_resource_info_watchlist(ticker: str):
     logger.info("In App.py")
     result = securities_resource.get_info_watchlist_by_ticker(ticker = ticker)
@@ -69,19 +70,35 @@ async def get_security_resource_info_watchlist(ticker: str):
     return result
 
 
-@app.get("/securities/custom_security_search/")
+@app.get("/securities/custom_security_search/", response_model = List[InfoWatchlistModel])
 async def security_custom_sql_search(query: str = None, 
-                      limit: int = 10, offset: int = 0):
+                      limit: int = 10, page: int = 0):
     logger.info("In App.py")
-    result = securities_resource.get_custom_search_query(query = query, limit = limit, page = offset)
+    result = securities_resource.get_custom_search_query(query = query, limit = limit, page = page)
     logger.info("Pass result App.py")
     return result
 
 
-@app.get("/securities/{ticker}/sell_security/{member_id}/{portfolio_id}")
-async def sell_security_by_id(ticker: str):
-    #TODO perform redirect to portfolio sell command
-    pass
+@app.put("/securities/update_security_price/{ticker}", response_model = SecuritiesModel)
+async def update_security_price(ticker: str):
+    logger.info("In App.py")
+    result = securities_resource.update_security_price(ticker = ticker)
+    logger.info("Pass result App.py")
+    return result
+
+@app.delete("/securities/delete_security/{ticker}")
+async def delete_security(ticker: str):
+    logger.info("In App.py")
+    result = securities_resource.delete_security_by_ticker(ticker = ticker)
+    logger.info("Pass result App.py")
+    return result
+
+@app.post("/securities/add_security/{ticker}")
+async def add_security(ticker: str, current_price: float = 0.00):
+    logger.info("In App.py")
+    result = securities_resource.add_security(ticker = ticker, current_price = current_price)
+    logger.info("Pass result App.py")
+    return result
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8015, log_level="info")

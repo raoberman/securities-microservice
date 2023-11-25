@@ -1,11 +1,11 @@
 
 import json
-import pandas as pd
+#import pandas as pd
 import requests
 import pymysql
 import sys
 #import yfinance
-from sqlalchemy import create_engine
+#from sqlalchemy import create_engine
 import json
 from fastapi import FastAPI, Response, HTTPException
 import logging
@@ -40,13 +40,35 @@ class securitiesDataService():
                 exc_type, exc_obj, exc_tb = sys.exc_info()
                 print(e, exc_tb.tb_lineno)
                 return {'status_code':500,'text': str(e),'body':{}}
+    
+    def _check_security_exists(self, ticker:str):
+        conn = self._connect_to_stocks_db()
+        try:
+            with conn.cursor() as cursor_check:
+                logger.info("checking if row exists")
+                check_query = "SELECT IF (EXISTS(SELECT ticker FROM SNP500 WHERE ticker = %s), 1,0)"
+
+                cursor_check.execute(check_query, ticker)
+                
+                exists = cursor_check.fetchone()[0]
+                conn.close()
+                #logger.info(type(exists))
+                logger.info(exists)
+                logger.info(type(exists))
+
+        except Exception as e:
+                exc_type, exc_obj, exc_tb = sys.exc_info()
+                print(e, exc_tb.tb_lineno)
+                return {'status_code':500,'text': str(e),'body':{}}
+        
+        return exists
         
     
     def get_security_by_ticker_sql(self, ticker: str):
         conn = self._connect_to_stocks_db()
 
         try:
-            logger.info('starting security add ticker via sql')
+            logger.info('starting securiter get via sql')
             
 
 
@@ -103,7 +125,7 @@ class securitiesDataService():
         return res
     
     
-    def get_top10_securities_by_price_sql(self, limit: int = 10, offset: int = 0):
+    def get_top_securities_by_price_sql(self, limit: int = 10, offset: int = 0):
         if limit > 10:
             raise HTTPException(status_code=500, detail="limit exceeded. Max number of securities per page is 50. please try another limit"
                               )
@@ -290,6 +312,128 @@ class securitiesDataService():
             
         
             return result
+    
+    def delete_security_by_ticker_sql(self, ticker: str):
+        
+        conn = self._connect_to_stocks_db()
+        if ticker == None:
+            raise HTTPException(status_code=500, detail='No ticker given to delete')
+        
+        exists = self._check_security_exists(ticker)
+        if exists == 0:
+            logger.info("in exception for row not existing")
+            
+            raise HTTPException(status_code=500, 
+                            detail='Ticker does not exist, cannot delete')
+        else:
+            logger.info('ticker does exists, starting security ticker delete via sql')
+
+        try:
+            with conn.cursor(pymysql.cursors.DictCursor) as cursor:
+                delete_stock_sql = """
+                DELETE 
+                FROM SNP500 
+                WHERE ticker = %s
+                """
+
+                # Execute the SQL command
+                cursor.execute(delete_stock_sql, ticker)
+                
+                logger.info("Finished executing sql")
+                
+                result = cursor.fetchall()
+                logger.info(result)
+                # Commit the changes
+                conn.commit()
+                conn.close()
+                
+        except Exception as e:
+                exc_type, exc_obj, exc_tb = sys.exc_info()
+                print(e, exc_tb.tb_lineno)
+                return {'status_code':500,'text': str(e),'body':{}}
+        
+        
+            
+        
+        result_string = ticker +" successfully deleted from securities DB"
+        result = {'status_code':200 ,'text': str(result_string),'body':{}}
+            
+        
+        return result
+    
+        
+        
+    def add_security_by_ticker_sql(self, ticker: str, current_price: float):
+        #logger.info(type(current_price))
+        #logger.info(current_price)
+        if len(ticker) > 4:
+            raise HTTPException(status_code=500, detail='Ticker symbol must be 1-4 characters')
+        
+        if current_price < float(0):
+            raise HTTPException(status_code=500, detail='Current price of stock must be greater than $0.00')
+        
+        ticker = ticker.upper()
+
+        current_price = round(current_price,2)
+
+        exists = self._check_security_exists(ticker)
+        if exists == 1:
+            logger.info("in exception for row existing")
+            
+            raise HTTPException(status_code=500, 
+                            detail='Ticker already exists')
+        else:
+            logger.info('ticker does not exist, starting security ticker add via sql')
+
+
+        try:
+            logger.info('starting security add ticker via sql')
+
+                
+            conn = self._connect_to_stocks_db()
+            with conn.cursor(pymysql.cursors.DictCursor) as cursor:
+                
+
+                add_stock_sql ="""
+                    INSERT INTO SNP500(ticker, current_price) VALUES (%s, %s); 
+                """
+
+                # Execute the SQL command
+                cursor.execute(add_stock_sql, (ticker, current_price))
+                
+                logger.info("Finished executing sql")
+                
+                result = cursor.fetchall()
+                logger.info(result)
+                # Commit the changes
+                conn.commit()
+
+                conn.close()
+
+                logger.info("All done")
+                
+                
+
+            
+
+        except Exception as e:
+                exc_type, exc_obj, exc_tb = sys.exc_info()
+                print(e, exc_tb.tb_lineno)
+                return {'status_code':500,'text': str(e),'body':{}}
+
+        
+
+        
+        # if result == None:      
+        #     raise HTTPException(status_code=500, 
+        #                                 detail="Row with ticker already exists"
+        #                             )
+        result_string = ticker +" successfully added into securities DB with price: " + str(current_price)
+        result = {'status_code':200 ,'text': str(result_string),'body':{}}
+            
+        
+        return result
+        
             
 
     

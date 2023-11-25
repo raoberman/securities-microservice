@@ -7,9 +7,6 @@ import logging
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-class SecuritiesModel(BaseModel):
-    ticker: str
-    current_price: float
 
 class InfoWatchlistModel(BaseModel):
     ticker: str
@@ -21,5 +18,9 @@ class InfoWatchlistModel(BaseModel):
     year_min: float | None = None
     year_max: float | None = None
     
+class SecuritiesModel(BaseModel):
+    ticker: str
+    current_price: float
+
 
 
