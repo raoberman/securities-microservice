@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 from securities_functions.securities_resource import SecuritiesResource
 from securities_functions.securities_data_service import securitiesDataService
-from securities_functions.securities_model import SecuritiesModel
+from securities_functions.securities_model import SecuritiesModel, InfoWatchlistModel
 from typing import List
 
 app = FastAPI()
@@ -47,15 +47,14 @@ def get_securities_resource():
 securities_resource = get_securities_resource()
 
 
-@app.get("/securities")
-async def get_security_top_10(offset: int = 0,
-                      limit: int = Query(default=10, le=100)):
+@app.get("/top_securities_by_price")
+async def get_security_top_10(limit: int = 10, offset: int = 0):
     logger.info("In App.py")
-    result = securities_resource.get_top10_securities_by_price()
+    result = securities_resource.get_top10_securities_by_price(limit, offset)
     logger.info("Pass result App.py")
     return result
 
-@app.get("/securities/{ticker}", response_model=List[SecuritiesModel])
+@app.get("/securities/{ticker}")
 async def get_security_resource_by_ticker(ticker: str):
     logger.info("In App.py")
     result = securities_resource.get_security_by_ticker(ticker = ticker)
@@ -70,10 +69,13 @@ async def get_security_resource_info_watchlist(ticker: str):
     return result
 
 
-@app.get("/securities/{ticker}/buy_security/{member_id}/{portfolio_id}")
-async def buy_security_by_id(ticker: str):
-    #TODO perform redirect to portfolio sell command
-    pass
+@app.get("/securities/custom_security_search/")
+async def security_custom_sql_search(query: str = None, 
+                      limit: int = 10, offset: int = 0):
+    logger.info("In App.py")
+    result = securities_resource.get_custom_search_query(query = query, limit = limit, page = offset)
+    logger.info("Pass result App.py")
+    return result
 
 
 @app.get("/securities/{ticker}/sell_security/{member_id}/{portfolio_id}")
