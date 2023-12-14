@@ -1,0 +1,1 @@
+from graphql_stuff.controllers.stock import stock as stock
