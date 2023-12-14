@@ -31,4 +31,4 @@ def graphene_connect_to_stocks_db(host = "database-1.csxyhdnwgd0j.us-east-2.rds.
 
 engine = graphene_connect_to_stocks_db()    
 meta = MetaData()
-conn = engine.connect() 
+conn = engine.connect()

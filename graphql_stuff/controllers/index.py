@@ -1,1 +1,1 @@
-from graphql_stuff.controllers.user import user as user
+from graphql_stuff.controllers.stock import stock as stock

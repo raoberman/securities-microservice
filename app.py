@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Response, Query
-from graphql_stuff.controllers.index import user
+from graphql_stuff.controllers.index import stock
 # heavy inspiration for graphql setup from: 
 # https://github.com/itsmaheshkariya/cautious-octo-disco/tree/main
 # youtube: https://www.youtube.com/watch?v=nynySD0WoYQ
@@ -18,7 +18,7 @@ from securities_functions.securities_model import SecuritiesModel, InfoWatchlist
 from typing import List
 
 app = FastAPI()
-app.include_router(user)
+app.include_router(stock)
                       
 
 def get_data_service():
