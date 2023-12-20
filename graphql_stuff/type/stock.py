@@ -5,6 +5,7 @@ import strawberry
 from graphql_stuff.conn.db import conn
 from graphql_stuff.models.index import stocks
 from strawberry.types import Info
+from fastapi import HTTPException
 import logging
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -27,6 +28,15 @@ class Query:
     #resolver
     @strawberry.field
     def getMultipleStocksInfo(self, info, limit: int = 10) -> typing.List[Stock]:
+        if limit > 50:
+            raise HTTPException(status_code=500, detail="limit exceeded. Max number of securities is 50. please try another limit"
+                              )
+           
+        if limit <= 0:
+            raise HTTPException(status_code=500, 
+                                detail='limit exceeded. Min number of securities per page is 1. please try another limit'
+                              )
+            
         result = conn.execute(stocks.select().limit(limit)).fetchall()
         return result
     
