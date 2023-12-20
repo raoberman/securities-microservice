@@ -1,46 +1,48 @@
 import typing
 from typing import Optional
+from fastapi import Query
 import strawberry
 from graphql_stuff.conn.db import conn
 from graphql_stuff.models.index import stocks
 from strawberry.types import Info
+import logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+import sys
 
 @strawberry.type
 class Stock:
     ticker: str
     current_price: float
-    perf_1_mo: Optional[float]
-    perf_3_mo: Optional[float]
-    perf_6_mo: Optional[float]
-    perf_1_year: Optional[float]
     year_min: Optional[float]
     year_max: Optional[float]
-
 
 @strawberry.type
 class Query:
     #resolver
     @strawberry.field
     def getStockInfoByTicker(self, info, ticker: str) -> Stock:
-        return conn.execute(stocks.select().where(stocks.c.ticker == ticker)).fetchone()
+        result = conn.execute(stocks.select().where(stocks.c.ticker == ticker)).fetchone()
+        return result
     #resolver
     @strawberry.field
     def getMultipleStocksInfo(self, info, limit: int = 10) -> typing.List[Stock]:
-        return conn.execute(stocks.select().limit(limit)).fetchall()
+        result = conn.execute(stocks.select().limit(limit)).fetchall()
+        return result
     
 
-    #example query:
-#     query Ex{
-#   user(ticker:"INTC"){
+# query ex1 {
+#   getStockInfoByTicker(ticker: "NVDA") {
+#     ticker
 #     currentPrice
 #     yearMin
 #     yearMax
 #   }
 # }
 
-# query Ex{
-#   users{
-    #ticker
+# query ex2 {
+#   getMultipleStocksInfo(limit: 2){
+#     ticker
 #     currentPrice
 #     yearMin
 #     yearMax
