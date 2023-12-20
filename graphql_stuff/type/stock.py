@@ -28,6 +28,7 @@ class Query:
     #resolver
     @strawberry.field
     def getMultipleStocksInfo(self, info, limit: int = 10) -> typing.List[Stock]:
+        #exceptions are only things not shown in video, added right after filming.
         if limit > 50:
             raise HTTPException(status_code=500, detail="limit exceeded. Max number of securities is 50. please try another limit"
                               )
@@ -36,7 +37,8 @@ class Query:
             raise HTTPException(status_code=500, 
                                 detail='limit exceeded. Min number of securities per page is 1. please try another limit'
                               )
-            
+
+        #shown in video   
         result = conn.execute(stocks.select().limit(limit)).fetchall()
         return result
     
